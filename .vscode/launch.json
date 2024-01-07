@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\demos\\app.js"
+            "program": "${workspaceFolder}\\app\\app.js"
         },
         {
             "type": "node",
@@ -20,16 +20,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\demos\\app2.js"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch app3",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\demos\\app3.js"
+            "program": "${workspaceFolder}\\app\\app2.js"
         }
     ]
 }
