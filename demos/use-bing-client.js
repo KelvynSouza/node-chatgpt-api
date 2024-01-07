@@ -14,13 +14,13 @@ const options = {
     // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
     host: '',
     // "_U" cookie from bing.com
-    userToken: '',
+    userToken: '12CvB0zAhQtndJVW09nwbZJwABFBPSnAS11Z9J7YvAeXTBs8_B_T5RHUeIEfFaQ_3MPvfzjzh1UC48POwWggTHICv4PHzeh2XzHidI_MLFsvd0UDAQa30UB_N5_IhoC2r6yb_XulfLtR3pQD9UXUCobXuhT-I4-P63_32MX8eDDhGRPyrySrr4fMkKUkpE_oVL2WabzlyLBzdP8FNBydGFYoZxTntBgu7k0I53iGTzHg12CvB0zAhQtndJVW09nwbZJwABFBPSnAS11Z9J7YvAeXTBs8_B_T5RHUeIEfFaQ_3MPvfzjzh1UC48POwWggTHICv4PHzeh2XzHidI_MLFsvd0UDAQa30UB_N5_IhoC2r6yb_XulfLtR3pQD9UXUCobXuhT-I4-P63_32MX8eDDhGRPyrySrr4fMkKUkpE_oVL2WabzlyLBzdP8FNBydGFYoZxTntBgu7k0I53iGTzHg',
     // If the above doesn't work, provide all your cookies as a string instead
     cookies: '',
     // A proxy string like "http://<ip>:<port>"
     proxy: '',
     // (Optional) Set to true to enable `console.debug()` logging
-    debug: false,
+    debug: true,
 };
 
 let bingAIClient = new BingAIClient(options);
@@ -56,6 +56,7 @@ response = await bingAIClient.sendMessage('Could you provide short and precise t
         process.stdout.write(token);
     },
 });
+
 console.log(JSON.stringify(response, null, 2)); // {"jailbreakConversationId":false,"conversationId":"...","conversationSignature":"...","clientId":"...","invocationId":2,"messageId":"...","conversationExpiryTime":"2023-03-08T03:20:23.463914Z","response":"Some possible takeaways from the document are... Some early users of ChatGPT and Whisper APIs include Snap Inc., Quizlet, Instacart, Shopify and Speak.","details":{ /* raw response... */ }}
 
 /*
