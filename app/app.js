@@ -87,7 +87,7 @@ async function TranslateFile(lines) {
         }
 
         let triesCounter = 0;
-        const triesLimit = 4;
+        const triesLimit = 5;
         let jailbreakResponse;
         while (triesCounter <= triesLimit) {
             console.log(`#${triesCounter} Tentativa`);
@@ -100,8 +100,7 @@ async function TranslateFile(lines) {
                     },
                 });
 
-                if ((String)(jailbreakResponse.response).match(/(\S*[\u3131-\u314e|\u314f-\u3163|\uac00-\ud7a3]+\S*)/g)
-                    && uniqueArray((String)(jailbreakResponse.response).match(/(\S*[\u3131-\u314e|\u314f-\u3163|\uac00-\ud7a3]+\S*)/g)).length > 4) {
+                if (validateResponse((String)(jailbreakResponse.response))) {
                     console.log(`Text not translated: ${jailbreakResponse.response}`);
                     throw Error('Text not translated');
                 }
@@ -124,13 +123,22 @@ async function TranslateFile(lines) {
     return translatedText;
 }
 
-function uniqueArray(myArray) {
-    for (let index = 0; index < myArray.length; index++) {
-        myArray[index] = myArray[index].replaceAll('.', '')
-                                       .replaceAll(',', '')
-                                       .replaceAll('!', '')
-                                       .replaceAll('?', '')
-                                       .replaceAll('"', '');
+function validateResponse(response) {
+    const iaRefusal = response.includes("I'm sorry, but I can't assist with that.");
+    let koreanWordsValidation = false;
+    if (!iaRefusal) {
+        const myArray = response.match(/(\S*[\u3131-\u314e|\u314f-\u3163|\uac00-\ud7a3]+\S*)/g);
+        if (myArray) {
+            for (let index = 0; index < myArray.length; index++) {
+                myArray[index] = myArray[index].replaceAll('.', '')
+                                               .replaceAll(',', '')
+                                               .replaceAll('!', '')
+                                               .replaceAll('?', '')
+                                               .replaceAll('"', '');
+            }
+            koreanWordsValidation = [...new Set(myArray)].length > 4;
+        }
     }
-    return [...new Set(myArray)];
+
+    return iaRefusal || koreanWordsValidation;
 }
