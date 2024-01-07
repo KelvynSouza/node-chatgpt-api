@@ -44,9 +44,14 @@ try {
 }
 
 files.sort((a, b) => {
-    const nameA = parseInt(a.toLowerCase().substring(a.indexOf('-') + 1).substring(0, a.indexOf('-') - 2).trim(), 10);
-    const nameB = parseInt(b.toLowerCase().substring(a.indexOf('-') + 1).substring(0, a.indexOf('-') - 2).trim(), 10);
-    return nameA - nameB;
+    try {
+        const nameA = parseInt(a.match(/\S[\d]+/)[0], 10);
+        const nameB = parseInt(b.match(/\S[\d]+/)[0], 10);
+        return nameA - nameB;
+    } catch (err) {
+        console.log(`File name has no chapter number to organize and identify order:\n ${a}\n${b}`);
+        throw err;
+    }
 });
 
 if (files.length > 0) {
