@@ -4,7 +4,6 @@
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import fs from 'fs';
-import { KeyvFile } from 'keyv-file';
 import { BingAIClient } from '../index.js';
 import config from './config.js';
 
@@ -25,14 +24,7 @@ const options = {
     debug: false,
 };
 
-const cacheOptions = {
-    store: new KeyvFile({ filename: 'cache.json' }),
-};
-
-const sydneyAIClient = new BingAIClient({
-    ...options,
-//    cache: cacheOptions,
-});
+const sydneyAIClient = new BingAIClient(options);
 
 const directoryPath = path.join(__dirname, config.translationSourcePath);
 
