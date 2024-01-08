@@ -58,8 +58,24 @@ if (files.length > 0) {
         const lines = file.split('\n');
         try {
             console.log(`Starting file: ${fileName} translation.`);
-            const translatedFileText = await TranslateFile(lines);
-            fs.writeFileSync(path.join(__dirname, `${config.translationDestinationPath}/${fileName}`), translatedFileText);
+
+            do {
+                const translatedFileText = await TranslateFile(lines);
+
+                const destinationFilePath = path.join(__dirname, `${config.translationDestinationPath}/${fileName}`);
+
+                fs.writeFileSync(destinationFilePath, translatedFileText);
+
+                const stats = fs.statSync(destinationFilePath);
+                const fileSizeInKybytes = stats.size / 1000;
+
+                if (fileSizeInKybytes < 9) {
+                    errorsInSequence += 1;
+                } else {
+                    break;
+                }
+            } while (errorsInSequence <= errorsInSequenceLimit);
+
             errorsInSequence = 0;
             console.log(`File: ${fileName} translated successfully.`);
             fs.unlinkSync(filePath);
@@ -77,7 +93,7 @@ if (files.length > 0) {
 async function TranslateFile(lines) {
     let translatedText = '';
 
-    const charactersLimit = 1600;
+    const charactersLimit = 1500;
 
     let startIndex = 0;
 

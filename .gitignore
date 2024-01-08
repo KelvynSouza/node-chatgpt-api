@@ -206,3 +206,5 @@ test.js
 *.test.js
 *.cast
 cache.json
+
+translation/
