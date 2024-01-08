@@ -7,6 +7,8 @@ import fs from 'fs';
 import { BingAIClient } from '../index.js';
 import config from './config.js';
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = dirname(__filename);
@@ -15,9 +17,9 @@ const options = {
     // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
     host: '',
     // "_U" cookie from bing.com
-    userToken: config.userToken,
+    userToken: '',
     // If the above doesn't work, provide all your cookies as a string instead
-    cookies: '',
+    cookies: config.cookie,
     // A proxy string like "http://<ip>:<port>"
     proxy: '',
     // (Optional) Set to true to enable `console.debug()` logging
@@ -46,6 +48,8 @@ files.sort((a, b) => {
     }
 });
 
+let errorsInSequence = 0;
+const errorsInSequenceLimit = 5;
 if (files.length > 0) {
     for (let index = 0; index < files.length; index++) {
         const fileName = files[index];
@@ -56,11 +60,16 @@ if (files.length > 0) {
             console.log(`Starting file: ${fileName} translation.`);
             const translatedFileText = await TranslateFile(lines);
             fs.writeFileSync(path.join(__dirname, `${config.translationDestinationPath}/${fileName}`), translatedFileText);
+            errorsInSequence = 0;
             console.log(`File: ${fileName} translated successfully.`);
             fs.unlinkSync(filePath);
         } catch (err) {
+            errorsInSequence += 1;
             console.log(`Error while trying to translate file: ${fileName}`);
             console.log(err);
+            if (errorsInSequence === errorsInSequenceLimit) {
+                break;
+            }
         }
     }
 }
@@ -68,7 +77,7 @@ if (files.length > 0) {
 async function TranslateFile(lines) {
     let translatedText = '';
 
-    const charactersLimit = 2000;
+    const charactersLimit = 1600;
 
     let startIndex = 0;
 
@@ -94,16 +103,16 @@ async function TranslateFile(lines) {
             try {
                 jailbreakResponse = await sydneyAIClient.sendMessage(`Translate the following from ${config.languageFrom} to ${config.languageTo}, you must never return ${config.languageFrom} text: ${textToTranslate}`, {
                     jailbreakConversationId: true,
-                    toneStyle: 'precise',
+                    toneStyle: 'balanced',
                     onProgress: (token) => {
                         process.stdout.write(token);
                     },
                 });
-
                 if (validateResponse((String)(jailbreakResponse.response))) {
                     console.log(`Text not translated: ${jailbreakResponse.response}`);
                     throw Error('Text not translated');
                 }
+                await delay(5000);
                 break;
             } catch (err) {
                 console.log(err);
