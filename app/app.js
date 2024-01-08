@@ -55,12 +55,11 @@ if (files.length > 0) {
         const fileName = files[index];
         const filePath = path.resolve(directoryPath, `./${fileName}`);
         const file = fs.readFileSync(filePath, 'utf8').toString();
-        const lines = file.split('\n');
         try {
             console.log(`Starting file: ${fileName} translation.`);
-
+            let incompleteFileErrors = 0;
             do {
-                const translatedFileText = await TranslateFile(lines);
+                const translatedFileText = await TranslateFile(file);
 
                 const destinationFilePath = path.join(__dirname, `${config.translationDestinationPath}/${fileName}`);
 
@@ -69,12 +68,16 @@ if (files.length > 0) {
                 const stats = fs.statSync(destinationFilePath);
                 const fileSizeInKybytes = stats.size / 1000;
 
-                if (fileSizeInKybytes < 9) {
-                    errorsInSequence += 1;
+                if (fileSizeInKybytes < 10) {
+                    incompleteFileErrors += 1;
                 } else {
                     break;
                 }
-            } while (errorsInSequence <= errorsInSequenceLimit);
+
+                if (incompleteFileErrors === errorsInSequenceLimit) {
+                    throw Error(`File: ${fileName} translation is incomplete.`);
+                }
+            } while (incompleteFileErrors <= errorsInSequenceLimit);
 
             errorsInSequence = 0;
             console.log(`File: ${fileName} translated successfully.`);
@@ -90,10 +93,12 @@ if (files.length > 0) {
     }
 }
 
-async function TranslateFile(lines) {
+async function TranslateFile(file) {
+    const lines = file.split('\n');
+
     let translatedText = '';
 
-    const charactersLimit = 1500;
+    const charactersLimit = 1000;
 
     let startIndex = 0;
 
