@@ -13,20 +13,21 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = dirname(__filename);
 
+let cookieIndex = 0;
 const options = {
     // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
     host: '',
     // "_U" cookie from bing.com
     userToken: '',
     // If the above doesn't work, provide all your cookies as a string instead
-    cookies: config.cookie,
+    cookies: config.cookies[cookieIndex],
     // A proxy string like "http://<ip>:<port>"
     proxy: '',
     // (Optional) Set to true to enable `console.debug()` logging
     debug: false,
 };
 
-const sydneyAIClient = new BingAIClient(options);
+let sydneyAIClient = new BingAIClient(options);
 
 const directoryPath = path.join(__dirname, config.translationSourcePath);
 
@@ -58,7 +59,7 @@ if (files.length > 0) {
         try {
             console.log(`Starting file: ${fileName} translation.`);
             let incompleteFileErrors = 0;
-            let incompleteFileErrorsLimit = 3;
+            const incompleteFileErrorsLimit = 3;
             do {
                 const translatedFileText = await TranslateFile(file);
 
@@ -139,11 +140,24 @@ async function TranslateFile(file) {
                 break;
             } catch (err) {
                 console.log(err);
+                if (err.message.includes('Throttled')) {
+                    console.log('Request Throttled, changing cookie');
+                    cookieIndex += 1;
+
+                    options.cookies = config.cookies[cookieIndex];
+
+                    sydneyAIClient = new BingAIClient(options);
+
+                    if (cookieIndex === config.cookies.length - 1) {
+                        cookieIndex = 0;
+                    }
+                } else {
+                    triesCounter += 1;
+                }
                 if (triesCounter === triesLimit) {
                     throw err;
                 }
             }
-            triesCounter += 1;
         }
 
         let resultedTranslation = (String)(jailbreakResponse.response);
