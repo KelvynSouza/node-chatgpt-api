@@ -58,6 +58,7 @@ if (files.length > 0) {
         try {
             console.log(`Starting file: ${fileName} translation.`);
             let incompleteFileErrors = 0;
+            let incompleteFileErrorsLimit = 3;
             do {
                 const translatedFileText = await TranslateFile(file);
 
@@ -74,10 +75,11 @@ if (files.length > 0) {
                     break;
                 }
 
-                if (incompleteFileErrors === errorsInSequenceLimit) {
-                    throw Error(`File: ${fileName} translation is incomplete.`);
+                if (incompleteFileErrors === incompleteFileErrorsLimit) {
+                    console.log(`File: ${fileName} translation is incomplete.`);
+                    break;
                 }
-            } while (incompleteFileErrors <= errorsInSequenceLimit);
+            } while (incompleteFileErrors <= incompleteFileErrorsLimit);
 
             errorsInSequence = 0;
             console.log(`File: ${fileName} translated successfully.`);
@@ -122,7 +124,7 @@ async function TranslateFile(file) {
         while (triesCounter <= triesLimit) {
             console.log(`#${triesCounter} Tentativa`);
             try {
-                jailbreakResponse = await sydneyAIClient.sendMessage(`Translate the following from ${config.languageFrom} to ${config.languageTo}, you must never return ${config.languageFrom} text: ${textToTranslate}`, {
+                jailbreakResponse = await sydneyAIClient.sendMessage(`Translate the following from ${config.languageFrom} to ${config.languageTo} yourself, without using a web translation service, you must never return ${config.languageFrom} text: ${textToTranslate}`, {
                     jailbreakConversationId: true,
                     toneStyle: 'balanced',
                     onProgress: (token) => {
