@@ -86,6 +86,9 @@ if (files.length > 0) {
             console.log(`File: ${fileName} translated successfully.`);
             fs.unlinkSync(filePath);
         } catch (err) {
+            if (err.message.includes('All cookies used.')) {
+               throw Error('All cookies used.');
+            }
             errorsInSequence += 1;
             console.log(`Error while trying to translate file: ${fileName}`);
             console.log(err);
@@ -141,16 +144,18 @@ async function TranslateFile(file) {
             } catch (err) {
                 console.log(err);
                 if (err.message.includes('Throttled')) {
-                    console.log('Request Throttled, changing cookie');
                     cookieIndex += 1;
+
+                    if (cookieIndex === config.cookies.length) {
+                        throw Error('All cookies used.');
+                    }
+
+                    console.log(`Request Throttled, changing cookie to ${cookieIndex + 1}`)
 
                     options.cookies = config.cookies[cookieIndex];
 
                     sydneyAIClient = new BingAIClient(options);
 
-                    if (cookieIndex === config.cookies.length - 1) {
-                        cookieIndex = 0;
-                    }
                 } else {
                     triesCounter += 1;
                 }
